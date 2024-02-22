@@ -1,7 +1,7 @@
 name: basic_initiative_tracker
 description: Basic initiative tracker for roleplaying games.
 publish_to: 'none'
-version: 0.1.0
+version: 0.2.0
 
 environment:
   sdk: '>=3.0.5 <4.0.0'
@@ -34,7 +34,7 @@ msix_config:
   identity_name: bailiegowing.basicInitiativeTracker
   logo_path: assets/appIcon.png
   certificate_path: C:\dev\init_tracker\Basic-Initiative-Tracker\basicInitTrackerCert.pfx
-  msix_version: 1.0.0.0
+  msix_version: 2.0.0.0
 
 flutter_launcher_icons:
   android: "launcher_icon"
