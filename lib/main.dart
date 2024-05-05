@@ -385,7 +385,7 @@ class HomePage extends StatelessWidget {
 								controller: initiativeController,
 								keyboardType: TextInputType.number,
 								inputFormatters: <TextInputFormatter>[
-									FilteringTextInputFormatter.allow(RegExp(r'\d+')),
+									FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*$')),
 								],
 							),
 							SizedBox(height: boxHeight),
