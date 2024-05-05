@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class InitTrackerItem {
-    int initiative;
-    String name;
+	double initiative;
+	String name;
 	String notes;
 	int totalHp = 0;
 	int currentHp = 0;
@@ -10,7 +10,7 @@ class InitTrackerItem {
 	UniqueKey key = UniqueKey();
 
 	//Default HP to 0 because not every character needs to have hitpoints recorded
-    InitTrackerItem({required this.initiative, required this.name, required this.notes, this.totalHp = 0, this.currentHp = 0});
+  InitTrackerItem({required this.initiative, required this.name, required this.notes, this.totalHp = 0, this.currentHp = 0});
 
 	InitTrackerItem.fromJson(Map<String, dynamic> json) :
 			initiative = (json['initiative'] as int?) ?? 0,

@@ -6,14 +6,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class InitTrackerItemCard extends StatelessWidget{
-    InitTrackerItem initTrackerItem;
+	InitTrackerItem initTrackerItem;
 	TextEditingController currentHpController = TextEditingController();
 	TextEditingController notesController = TextEditingController();
 	IconButton deleteButton;
 	IconButton copyButton;
+	IconButton editButton;
 	bool isSelected;
 
-	InitTrackerItemCard({super.key, required this.initTrackerItem, required this.deleteButton, required this.copyButton, required this.isSelected}){
+	InitTrackerItemCard({
+		super.key, 
+		required this.initTrackerItem, 
+		required this.deleteButton, 
+		required this.copyButton, 
+		required this.isSelected,
+		required this.editButton,
+	}){
 		currentHpController.text = initTrackerItem.currentHp.toString();
 		notesController.text = initTrackerItem.notes;
 	}
@@ -21,7 +29,7 @@ class InitTrackerItemCard extends StatelessWidget{
 	@override
 	Widget build(BuildContext context){
 		return Card(
-			color: isSelected ? Theme.of(context).colorScheme.onTertiaryContainer : Theme.of(context).cardColor,
+			color: isSelected ? Theme.of(context).colorScheme.surfaceVariant : Theme.of(context).colorScheme.surface,
 			child: Padding(
 				padding: const EdgeInsets.all(8.0),
 				child: Row(
@@ -34,9 +42,9 @@ class InitTrackerItemCard extends StatelessWidget{
 								controller: notesController,
 								decoration: InputDecoration(
 									border: UnderlineInputBorder(
-										borderSide: BorderSide(color: Theme.of(context).primaryColorDark)
+										borderSide: BorderSide(color: Theme.of(context).colorScheme.outline)
 									),
-									filled: true
+									filled: true,
 								),
 								style: TextStyle(fontSize: MediaQuery.sizeOf(context).width > 500 ? 12 : 10,),
 								onChanged: (value){
@@ -50,10 +58,10 @@ class InitTrackerItemCard extends StatelessWidget{
 							decoration: BoxDecoration(
 								borderRadius: const BorderRadius.all(Radius.circular(10)),
 								border: Border.all(
-									color: Theme.of(context).colorScheme.secondary,
+									color: Theme.of(context).colorScheme.outlineVariant,
 									width: 1.5,
 								),
-								color: Theme.of(context).colorScheme.secondary,
+								color: Theme.of(context).colorScheme.outlineVariant,
 							),
 							child: Row( 
 								children: [
@@ -63,7 +71,7 @@ class InitTrackerItemCard extends StatelessWidget{
 											controller: currentHpController,
 											decoration: InputDecoration(
 												border: UnderlineInputBorder(
-													borderSide: BorderSide(color: Theme.of(context).primaryColorDark)
+													borderSide: BorderSide(color: Theme.of(context).colorScheme.outline)
 												),
 												filled: true
 											),
@@ -91,13 +99,15 @@ class InitTrackerItemCard extends StatelessWidget{
 							decoration: BoxDecoration(
 								borderRadius: const BorderRadius.all(Radius.circular(10)),
 								border: Border.all(
-									color: Theme.of(context).colorScheme.onPrimaryContainer,
+									color: Theme.of(context).colorScheme.outlineVariant,
 									width: 1.5,
 								),
-								color: Theme.of(context).colorScheme.onPrimaryContainer,
+								color: Theme.of(context).colorScheme.outlineVariant
+								
 							),
 							child: Text(
-								initTrackerItem.initiative.toString().padLeft(2, "0"),
+				//Pad left "4" because of the decimal point and the trailing digit
+								initTrackerItem.initiative.toString().padLeft(4, "0"),
 								style: UIStyles.getRegularText(context).copyWith(
 									fontWeight: FontWeight.bold, 
 									fontSize: MediaQuery.sizeOf(context).width > 500 ? 22 : 18,
@@ -107,6 +117,7 @@ class InitTrackerItemCard extends StatelessWidget{
 						SizedBox(
 							width: MediaQuery.sizeOf(context).width > 500 ? 5 : 2,
 						),
+			editButton,
 						copyButton,
 						deleteButton,
 					]

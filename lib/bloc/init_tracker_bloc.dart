@@ -22,8 +22,9 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 				key = state.initList[state.listPlace].key;
 				//Add the new initiative step
 				state.initList.add(event.item);
-				//Sort high to low initative
-				state.initList.sort((a, b) => a.initiative.compareTo(b.initiative) * -1);
+				//Sort list
+				sortInitList(state.initList);
+
 				//Find the item with the saved key and set it as the currently selected item
 				for (int i = 0; i < state.initList.length; i++){
 					if (state.initList[i].key == key){
@@ -85,6 +86,37 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 				}
 			}
 			state.initList.removeAt(itemIndex);
+
+			//Find the item with the saved key and set it as the currently selected item
+			for (int i = 0; i < state.initList.length; i++){
+				if (state.initList[i].key == currItemKey){
+					newListPlace = i;
+					break;
+				}
+			}
+
+			emit(InitTrackerBlocState(
+				initList: state.initList,
+				listPlace: newListPlace,
+			));
+		});
+
+		on<EditItem>((event, emit){
+			UniqueKey currItemKey;
+			int newListPlace = 0;
+
+			//Save the key for the currently selected item so it doesn't lose its place
+			currItemKey = state.initList[state.listPlace].key;
+
+			//Find the item with the key that needs to be replaced and exchange all the fields
+			for (int i = 0; i < state.initList.length; i++){
+				if (event.key == state.initList[i].key){
+					state.initList[i] = event.newItem;
+				}
+			}
+
+      		//Sort list
+			sortInitList(state.initList);
 
 			//Find the item with the saved key and set it as the currently selected item
 			for (int i = 0; i < state.initList.length; i++){
@@ -174,5 +206,10 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 
 		});
 
+	}
+	
+	void sortInitList(List<InitTrackerItem> initList){
+		//Sort high to low initative
+		initList.sort((a, b) => a.initiative.compareTo(b.initiative) * -1);
 	}
 }

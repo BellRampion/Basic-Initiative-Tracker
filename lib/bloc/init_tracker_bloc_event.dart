@@ -28,6 +28,12 @@ class RestartTracker extends InitTrackerBlocEvent {
 	RestartTracker();
 }
 
+class EditItem extends InitTrackerBlocEvent {
+  UniqueKey key;
+  InitTrackerItem newItem;
+
+  EditItem({required this.key, required this.newItem});
+}
 class SaveTracker extends InitTrackerBlocEvent {
 	String filename;
 	SaveTracker({required this.filename});
