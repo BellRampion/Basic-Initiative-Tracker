@@ -191,6 +191,50 @@ class HomePage extends StatelessWidget {
 				floatingActionButton: Padding(
 					padding: EdgeInsets.all(16.0),
 					child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+						SizedBox(
+									height: MediaQuery.of(context).size.height > 500 ? 100 : 30,
+									child: Container(),
+								),
+						FloatingActionButton(
+							child: Icon(Icons.save),
+							onPressed: () async {
+								String? outputFile = await FilePicker.platform.saveFile(
+									dialogTitle: 'Please select an output file:',
+									fileName: 'output-file.txt',
+								);
+
+								if (outputFile == null) {
+								// User canceled the picker
+									ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+										content: Text("Canceled save operation"),
+									));
+								}
+								else {
+									context.read<InitTrackerBloc>().add(SaveTracker(filename: outputFile));
+								}
+
+							} 
+						),
+						SizedBox(width: iconButtonSpacing),
+						FloatingActionButton(
+							child: Icon(Icons.file_open),
+							onPressed: () async {
+								String? inputFile = (await FilePicker.platform.pickFiles(
+									dialogTitle: 'Please select an input file:',
+								))?.files.single.path;
+
+								if (inputFile == null) {
+								// User canceled the picker
+									ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+										content: Text("Canceled load operation"),
+									));
+								}
+								else {
+									context.read<InitTrackerBloc>().add(LoadTracker(filename: inputFile));
+								}
+							}
+						),
+						SizedBox(width: iconButtonSpacing),
 						FloatingActionButton(
 								heroTag: UniqueKey(),
 								child: Icon(Icons.delete_outlined),
@@ -245,7 +289,6 @@ class HomePage extends StatelessWidget {
 										);
 									},
 								);
-
 								if (item != null) {
 									context.read<InitTrackerBloc>().add(AddInitItem(item: item));
 								}
