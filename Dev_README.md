@@ -7,5 +7,5 @@ To change the icon:
     
 To build to Linux: 
 
-	- `fluter build linux --release`
+	- `flutter build linux --release`
 	- flutter_to_debian
