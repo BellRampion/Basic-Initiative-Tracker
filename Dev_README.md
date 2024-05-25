@@ -9,3 +9,10 @@ To build to Linux:
 
 	- `flutter build linux --release`
 	- flutter_to_debian
+
+To build to Windows
+
+	- `flutter build windows --release`
+	- Add the cert to root file for Basic Initiative Tracker
+	- Add cert password to pubspec.yaml
+	- ` dart run msix:create`
