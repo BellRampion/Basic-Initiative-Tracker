@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, must_be_immutable
+// ignore_for_file: file_names, must_be_immutable, use_build_context_synchronously, prefer_const_constructors_in_immutables
 
 import 'package:basic_initiative_tracker/bloc/theme_color_bloc.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
