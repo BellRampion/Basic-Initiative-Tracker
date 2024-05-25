@@ -1,6 +1,7 @@
 // ignore_for_file: file_names, must_be_immutable, use_build_context_synchronously, prefer_const_constructors_in_immutables
 
 import 'package:basic_initiative_tracker/bloc/theme_color_bloc.dart';
+import 'package:basic_initiative_tracker/main.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,16 +22,24 @@ class SettingsPageState extends State<SettingsPage> {
 		title: const Text("Settings"),
 		),
 		// Show the color picker in sized box in a raised card.
-		body: Column(children: [
-		Switch(
-			value: BlocProvider.of<ThemeColorBloc>(context).state.selectedThemeMode == ThemeMode.dark ? true : false,
-			onChanged: (value) {
-				BlocProvider.of<ThemeColorBloc>(context).add(
-					ChangeThemeMode( newThemeMode: value == true ? ThemeMode.dark : ThemeMode.light)
-				);
-			},
-		),
-		// Pick color in a dialog.
+		body: Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Dark Mode", style: UIStyles.getRegularText(context)),
+            const SizedBox(width: 10),
+            Switch(
+              value: BlocProvider.of<ThemeColorBloc>(context).state.selectedThemeMode == ThemeMode.dark ? true : false,
+              onChanged: (value) {
+                BlocProvider.of<ThemeColorBloc>(context).add(
+                  ChangeThemeMode( newThemeMode: value == true ? ThemeMode.dark : ThemeMode.light)
+                );
+              },
+            ),
+          ]
+        ),
+      // Pick color in a dialog.
 		ListTile(
 			title: const Text('Click this color to change it in a dialog'),
 			trailing: ColorIndicator(

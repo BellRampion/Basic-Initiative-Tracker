@@ -94,7 +94,7 @@ class HomePage extends StatelessWidget {
 		}, builder: (context, state) {
 			return Scaffold(
 				appBar: AppBar(
-					backgroundColor: Theme.of(context).colorScheme.onPrimary,
+					backgroundColor: BlocProvider.of<ThemeColorBloc>(context).state.selectedThemeMode == ThemeMode.dark ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
 					title: Text("Initiative Tracker",
 							style: UIStyles.getHeaderText(context)),
 					actions: [
@@ -196,6 +196,7 @@ class HomePage extends StatelessWidget {
 									child: Container(),
 								),
 						FloatingActionButton(
+              heroTag: UniqueKey(),
 							child: Icon(Icons.save),
 							onPressed: () async {
 								String? outputFile = await FilePicker.platform.saveFile(
@@ -217,6 +218,7 @@ class HomePage extends StatelessWidget {
 						),
 						SizedBox(width: iconButtonSpacing),
 						FloatingActionButton(
+              heroTag: UniqueKey(),
 							child: Icon(Icons.file_open),
 							onPressed: () async {
 								String? inputFile = (await FilePicker.platform.pickFiles(
