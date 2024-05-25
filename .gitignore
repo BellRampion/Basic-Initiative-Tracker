@@ -33,3 +33,4 @@ Algorithm Design.txt
 #Manually added exclusions
 Algorithm Design.txt
 .debian/packages
+basicInitTrackerCert.pfx
