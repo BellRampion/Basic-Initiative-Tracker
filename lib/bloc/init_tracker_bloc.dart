@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:basic_initiative_tracker/constants.dart';
 import 'package:basic_initiative_tracker/data_models/init_tracker_item.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,6 +13,7 @@ part 'init_tracker_bloc_event.dart';
 
 class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 	bool sortOnNewRound = false;
+	SystemChoices selectedSystem = SystemChoices.pathfinder;
 
 	InitTrackerBloc() : super(InitTrackerBlocState.initial()){
 
@@ -70,6 +73,7 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 					}
 				}
 			}
+			// If the next step is 0 (start) and all combat actions have been used, start a new round
 			if (newStep == 0 && combatActionsFinished){
         for (InitTrackerItem item in state.initList){
           item.reaction1Used = false;
@@ -83,6 +87,7 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
           roundCounter: ++state.roundCounter,
 				));
 			}
+			// Otherwise, go to the next item in the list
 			else {
 				emit(InitTrackerBlocState(
 					initList: state.initList,
@@ -160,7 +165,7 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 			emit(InitTrackerBlocState(
 				initList: [],
 				listPlace: 0,
-        roundCounter: 0,
+        roundCounter: 1,
 			));
 		});
 
@@ -236,10 +241,26 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 
 		});
 
+		on<SwitchSystem>((event, emit){
+			selectedSystem = event.system;
+		});
+
 	}
 	
 	void sortInitList(List<InitTrackerItem> initList){
-		//Sort high to low initative
-		initList.sort((a, b) => a.initiative.compareTo(b.initiative) * -1);
+
+		//Sort high to low initative for most systems; otherwise, use custom sorting
+		if (selectedSystem.computerReadableName == SystemChoices.vtm.computerReadableName){
+			int categorySort(InitTrackerItem item1, InitTrackerItem item2) => item1.category.priority.compareTo(item2.category.priority);	
+			int groupSort(InitTrackerItem item1, InitTrackerItem item2) => item1.group.compareTo(item2.group);	
+			int initSort(InitTrackerItem item1, InitTrackerItem item2) => item1.initiative.compareTo(item2.initiative) * -1;	
+
+			final compareItems = categorySort.then(groupSort).then(initSort);
+
+			initList.sort(compareItems);
+		}
+		else {
+			initList.sort((a, b) => a.initiative.compareTo(b.initiative) * -1);
+		}
 	}
 }

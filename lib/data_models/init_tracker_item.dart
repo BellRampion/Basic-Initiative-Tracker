@@ -1,3 +1,4 @@
+import 'package:basic_initiative_tracker/constants.dart';
 import 'package:flutter/material.dart';
 
 /// Model class for items on the initiative tracker
@@ -9,17 +10,21 @@ class InitTrackerItem {
 	String notes;
 	int totalHp = 0;
 	int currentHp = 0;
+	CombatCategory category;
+	int group;
 	//Rogue Trader specific
   bool reaction1Used = false;
   bool reaction2Used = false;
 	//Runequest II/Legend specific
 	int combatActions = 0;
 	int combatActionsTotal = 0;
+	//Vampire The Masquerade specific
+	VtmSpecificValues vtmSpecific;
 	//Distinct identifier to refer to this initiative card by
 	UniqueKey key = UniqueKey();
 
 	//Default HP to 0 because not every character needs to have hitpoints recorded
-	InitTrackerItem({required this.initiative, required this.name, required this.notes, this.totalHp = 0, this.currentHp = 0, this.combatActions = 0, this.combatActionsTotal = 0});
+	InitTrackerItem({required this.initiative, required this.name, required this.notes, this.totalHp = 0, this.currentHp = 0, this.category = CombatCategory.other, this.group = 0, this.combatActions = 0, this.combatActionsTotal = 0, required this.vtmSpecific});
 
 	InitTrackerItem.fromJson(Map<String, dynamic> json) :
 			initiative = (json['initiative'] as double?) ?? 0,
@@ -27,10 +32,13 @@ class InitTrackerItem {
 			notes = (json['notes'] as String?) ?? "",
 			totalHp = (json['totalHp'] as int?) ?? 0,
 			currentHp = (json['currentHp'] as int?) ?? 0,
+			category = CombatCategory.getByComputerName(json['category'] as String? ?? CombatCategory.other.computerReadableName),
+			group = (json['group'] as int?) ?? 0,
       reaction1Used = (json['reaction1Used'] as bool?) ?? false,
       reaction2Used = (json['reaction2Used'] as bool?) ?? false,
 			combatActionsTotal = (json['combatActionsTotal'] as int?) ?? 0,
-			combatActions = (json['combatActions'] as int?) ?? 0;
+			combatActions = (json['combatActions'] as int?) ?? 0,
+			vtmSpecific = (json['vtmSpecific'] != null ) ? VtmSpecificValues.fromJson((json['vtmSpecific'] as Map<String, dynamic>)) : VtmSpecificValues();
 
 	/// Converts this object to a json map. 
 	/// 
@@ -42,10 +50,43 @@ class InitTrackerItem {
 			"notes": notes,
 			"totalHp": totalHp,
 			"currentHp": currentHp,
+			"category": category.computerReadableName,
+			"group": group,
       "reaction1Used": reaction1Used,
       "reaction2Used": reaction2Used,
 			"combatActionsTotal": combatActionsTotal,
-			"combatActions": combatActions
+			"combatActions": combatActions,
+			"vtmSpecific": vtmSpecific.toJson()
+		};
+	}
+}
+
+class VtmSpecificValues {
+	int healthSuperficial = 0;
+	int healthAggravated = 0;
+	int willSuperficial = 0;
+	int willAggravated = 0;
+	int willTotal = 0;
+	bool impaired = false;
+
+	VtmSpecificValues({this.healthSuperficial = 0, this.healthAggravated = 0, this.willSuperficial = 0, this.willAggravated = 0, this.willTotal = 0, this.impaired = false});
+
+	VtmSpecificValues.fromJson(Map<String, dynamic> json) :
+			healthSuperficial = (json['healthSuperficial'] as int?) ?? 0,
+			healthAggravated = (json['healthAggravated'] as int?) ?? 0,
+			willSuperficial = (json['willSuperficial'] as int?) ?? 0,
+			willAggravated = (json['willAggravated'] as int?) ?? 0,
+			willTotal = (json['willTotal'] as int?) ?? 0,
+			impaired = (json['impaired'] as bool?) ?? false;
+
+	Map<String, dynamic> toJson(){
+		return {
+			"healthSuperficial": healthSuperficial,
+			"healthAggravated": healthAggravated,
+			"willSuperficial": willSuperficial,
+			"willAggravated": willAggravated,
+			"willTotal": willTotal,
+			"impaired": impaired
 		};
 	}
 }

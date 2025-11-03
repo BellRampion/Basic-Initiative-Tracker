@@ -43,3 +43,9 @@ class LoadTracker extends InitTrackerBlocEvent {
 	String filename;
 	LoadTracker({required this.filename});
 }
+
+class SwitchSystem extends InitTrackerBlocEvent {
+	SystemChoices system;
+
+	SwitchSystem({required this.system});
+}

@@ -1,9 +1,9 @@
 // ignore_for_file: file_names, must_be_immutable, use_build_context_synchronously, prefer_const_constructors_in_immutables
 
+import 'package:basic_initiative_tracker/bloc/init_tracker_bloc.dart';
 import 'package:basic_initiative_tracker/constants.dart';
 import 'package:basic_initiative_tracker/bloc/settings_bloc.dart';
 import 'package:basic_initiative_tracker/bloc/theme_color_bloc.dart';
-import 'package:basic_initiative_tracker/main.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -82,6 +82,12 @@ class SettingsPageState extends State<SettingsPage> {
                         BlocProvider.of<SettingsBloc>(context).add(
                           SystemChangeEvent(
                             newSelectedSystem: value ?? SystemChoices.pathfinder
+                          )
+                        );
+												//InitTrackerBloc also needs to store the selected system 
+												BlocProvider.of<InitTrackerBloc>(context).add(
+                          SwitchSystem(
+                            system: value ?? SystemChoices.pathfinder
                           )
                         );
                       });

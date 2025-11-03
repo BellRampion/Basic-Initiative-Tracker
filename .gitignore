@@ -29,6 +29,7 @@ doc/api/
 #Manually added exclusions
 Algorithm Design.txt
 .debian/packages
+VTM specific changes.md
 
 #Manually added exclusions
 Algorithm Design.txt

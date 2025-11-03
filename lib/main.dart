@@ -148,7 +148,8 @@ class HomePage extends StatelessWidget {
 																	initiative: initialItem.initiative,
 																	currentHp: initialItem.currentHp,
 																	totalHp: initialItem.totalHp,
-																	combatActions: initialItem.combatActions
+																	combatActions: initialItem.combatActions,
+																	vtmValues: initialItem.vtmSpecific,
 																);
 															},
 														);
@@ -173,6 +174,7 @@ class HomePage extends StatelessWidget {
 																	currentHp: initialItem.currentHp,
 																	totalHp: initialItem.totalHp,
 																	combatActions: initialItem.combatActions,
+																	vtmValues: initialItem.vtmSpecific,
 																);
 															},
 														);
@@ -303,7 +305,8 @@ class HomePage extends StatelessWidget {
 											initiative: 0,
 											currentHp: 0,
 											totalHp: 0,
-											combatActions: 0
+											combatActions: 0,
+											vtmValues: VtmSpecificValues()
 										);
 									},
 								);
@@ -344,6 +347,7 @@ class HomePage extends StatelessWidget {
 		required int totalHp,
 		required double initiative,
 		required int combatActions,
+		required VtmSpecificValues vtmValues,
 		String? title,
 	}) {
 		TextEditingController nameController = TextEditingController(text: name);
@@ -355,6 +359,15 @@ class HomePage extends StatelessWidget {
 		TextEditingController initiativeController =
 				TextEditingController(text: initiative.toString());
 		TextEditingController combatActionsController = TextEditingController(text: combatActions.toString());
+		TextEditingController superficialHpDmgController =
+				TextEditingController(text: vtmValues.healthSuperficial.toString());
+		TextEditingController aggravatedHpDmgController =
+				TextEditingController(text: vtmValues.healthAggravated.toString());
+		TextEditingController superficialWillDmgController =
+				TextEditingController(text: vtmValues.willSuperficial.toString());
+		TextEditingController aggravatedWillDmgController = TextEditingController(text: vtmValues.willAggravated.toString());
+		TextEditingController totalWillController =
+				TextEditingController(text: vtmValues.willTotal.toString());
 
 		return AlertDialog(
 				title: Text(title ?? "Add New Initiative Step",
@@ -379,33 +392,35 @@ class HomePage extends StatelessWidget {
 								style: UIStyles.getRegularText(context),
 								controller: notesController,
 							),
-							//Only ask for combat actions if the selected system is Runequest
-							if (SystemChoices.runequest.computerReadableName == context.watch<SettingsBloc>().state.selectedSystem.computerReadableName) 
-							SizedBox(height: boxHeight),
-							if (SystemChoices.runequest.computerReadableName == context.watch<SettingsBloc>().state.selectedSystem.computerReadableName) 
-							TextField(
-								decoration: InputDecoration(
-									labelText: "Combat Actions", 
-									border: OutlineInputBorder()),
-								style: UIStyles.getRegularText(context),
-								controller: combatActionsController,
-								keyboardType: TextInputType.number,
-								inputFormatters: <TextInputFormatter>[
-									FilteringTextInputFormatter.allow(RegExp(r'\d+')),
-								],
-							),
-							SizedBox(height: boxHeight),
-							TextField(
-								decoration: InputDecoration(
-									labelText: "Current hitpoints",
-									border: OutlineInputBorder()),
-								style: UIStyles.getRegularText(context),
-								controller: currentHpController,
-								keyboardType: TextInputType.numberWithOptions(signed: true),
-								inputFormatters: <TextInputFormatter>[
-									FilteringTextInputFormatter.allow(RegExp(r'-?\d*')),
-								],
-							),
+							//Conditionally returns either an empty SizedBox or the item fields depending on selected system
+							runequestFields(
+								context: context, 
+								combatActionsController: combatActionsController),
+							//Don't show the current hitpoints if the system is VtM; it tracks hp differently
+							if (SystemChoices.vtm.computerReadableName != context.watch<SettingsBloc>().state.selectedSystem.computerReadableName) ... [
+								SizedBox(height: boxHeight),
+								TextField(
+									decoration: InputDecoration(
+										labelText: "Current hitpoints",
+										border: OutlineInputBorder()),
+									style: UIStyles.getRegularText(context),
+									controller: currentHpController,
+									keyboardType: TextInputType.numberWithOptions(signed: true),
+									inputFormatters: <TextInputFormatter>[
+										FilteringTextInputFormatter.allow(RegExp(r'-?\d*')),
+									],
+								)
+							],
+								//Conditionally returns either an empty SizedBox or the item fields depending on selected system
+								vtmItemFields(
+									vtmValues: vtmValues,
+									context: context,
+									superficialHpDmgController: superficialHpDmgController,
+									aggravatedHpDmgController: aggravatedHpDmgController,
+									superficialWillDmgController: superficialWillDmgController,
+									aggravatedWillDmgController: aggravatedWillDmgController,
+									totalWillController: totalWillController
+								),
 							SizedBox(height: boxHeight),
 							TextField(
 								decoration: InputDecoration(
@@ -451,33 +466,128 @@ class HomePage extends StatelessWidget {
 										totalHp: int.tryParse(totalHpController.text) ?? 0,
 										combatActions: int.tryParse(combatActionsController.text) ?? 0,
 										combatActionsTotal: int.tryParse(combatActionsController.text) ?? 0,
+										vtmSpecific: VtmSpecificValues(
+											healthSuperficial: int.tryParse( superficialHpDmgController.text) ?? 0, 
+											healthAggravated: int.tryParse( aggravatedHpDmgController.text) ?? 0,
+											willSuperficial: int.tryParse( superficialWillDmgController.text) ?? 0, 
+											willAggravated: int.tryParse( aggravatedWillDmgController.text) ?? 0,
+											willTotal: int.tryParse( totalWillController.text) ?? 0,
+										)
 									));
 						},
 						child: Text("Done", style: UIStyles.getTextButtonText(context)),
 					),
 				]);
 	}
+
+	Widget vtmItemFields({
+		required VtmSpecificValues vtmValues,
+		required BuildContext context,
+		required TextEditingController superficialHpDmgController,
+		required TextEditingController aggravatedHpDmgController,
+		required TextEditingController superficialWillDmgController,
+		required TextEditingController aggravatedWillDmgController,
+		required TextEditingController totalWillController,
+	}){
+		if (SystemChoices.vtm.computerReadableName == context.watch<SettingsBloc>().state.selectedSystem.computerReadableName) {
+			return Column(
+				children: [
+					SizedBox(height: boxHeight),
+					TextField(
+						decoration: InputDecoration(
+							labelText: "Superficial Health Damage", 
+							border: OutlineInputBorder()),
+						style: UIStyles.getRegularText(context),
+						controller: superficialHpDmgController,
+						keyboardType: TextInputType.number,
+						inputFormatters: <TextInputFormatter>[
+							FilteringTextInputFormatter.allow(RegExp(r'\d+')),
+						],
+					),
+					SizedBox(height: boxHeight),
+					TextField(
+						decoration: InputDecoration(
+							labelText: "Aggravated Health Damage", 
+							border: OutlineInputBorder()),
+						style: UIStyles.getRegularText(context),
+						controller: aggravatedHpDmgController,
+						keyboardType: TextInputType.number,
+						inputFormatters: <TextInputFormatter>[
+							FilteringTextInputFormatter.allow(RegExp(r'\d+')),
+						],
+					),
+					SizedBox(height: boxHeight),
+					TextField(
+						decoration: InputDecoration(
+							labelText: "Superficial Willpower Damage", 
+							border: OutlineInputBorder()),
+						style: UIStyles.getRegularText(context),
+						controller: superficialWillDmgController,
+						keyboardType: TextInputType.number,
+						inputFormatters: <TextInputFormatter>[
+							FilteringTextInputFormatter.allow(RegExp(r'\d+')),
+						],
+					),
+					SizedBox(height: boxHeight),
+					TextField(
+						decoration: InputDecoration(
+							labelText: "Aggravated Willpower Damage", 
+							border: OutlineInputBorder()),
+						style: UIStyles.getRegularText(context),
+						controller: aggravatedWillDmgController,
+						keyboardType: TextInputType.number,
+						inputFormatters: <TextInputFormatter>[
+							FilteringTextInputFormatter.allow(RegExp(r'\d+')),
+						],
+					),
+					SizedBox(height: boxHeight),
+					TextField(
+						decoration: InputDecoration(
+							labelText: "Total Willpower", 
+							border: OutlineInputBorder()),
+						style: UIStyles.getRegularText(context),
+						controller: totalWillController,
+						keyboardType: TextInputType.number,
+						inputFormatters: <TextInputFormatter>[
+							FilteringTextInputFormatter.allow(RegExp(r'\d+')),
+						],
+					),
+				]
+			);
+		}
+		else {
+			return SizedBox(height: 0, width: 0,);
+		}
+	}
+
+	Widget runequestFields({
+		required BuildContext context,
+		required TextEditingController combatActionsController
+	}){
+
+		//Only ask for combat actions if the selected system is Runequest
+		if (SystemChoices.runequest.computerReadableName == context.watch<SettingsBloc>().state.selectedSystem.computerReadableName){
+			return Column(
+				children: [
+					SizedBox(height: boxHeight),
+					TextField(
+						decoration: InputDecoration(
+							labelText: "Combat Actions", 
+							border: OutlineInputBorder()),
+						style: UIStyles.getRegularText(context),
+						controller: combatActionsController,
+						keyboardType: TextInputType.number,
+						inputFormatters: <TextInputFormatter>[
+							FilteringTextInputFormatter.allow(RegExp(r'\d+')),
+						],
+					),
+				]
+			);
+		}
+		else {
+			return SizedBox(height: 0, width: 0,);
+		}
+	}
 }
 
-class UIStyles {
-	static final TextStyle _regularText = TextStyle(fontSize: 14);
-	static final TextStyle _textButtonText =
-			TextStyle(fontSize: 12, fontWeight: FontWeight.bold);
-	static final TextStyle _headerText =
-			TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
 
-	static TextStyle getRegularText(BuildContext context) {
-		return _regularText.copyWith(
-				fontSize: MediaQuery.sizeOf(context).height > 500 ? 14 : 10);
-	}
-
-	static TextStyle getTextButtonText(BuildContext context) {
-		return _textButtonText.copyWith(
-				fontSize: MediaQuery.sizeOf(context).height > 500 ? 12 : 8);
-	}
-
-	static TextStyle getHeaderText(BuildContext context) {
-		return _headerText.copyWith(
-				fontSize: MediaQuery.sizeOf(context).height > 500 ? 16 : 12);
-	}
-}
