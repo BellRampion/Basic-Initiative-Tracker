@@ -14,11 +14,14 @@ class InitTrackerItemCard extends StatefulWidget{
 	TextEditingController notesController = TextEditingController();
 	TextEditingController superficialHpDmgController =
 				TextEditingController();
-		TextEditingController aggravatedHpDmgController =
+  TextEditingController aggravatedHpDmgController =
 				TextEditingController();
-		TextEditingController superficialWillDmgController =
+  TextEditingController superficialWillDmgController =
 				TextEditingController();
-		TextEditingController aggravatedWillDmgController = TextEditingController();
+  TextEditingController aggravatedWillDmgController = TextEditingController();
+  TextEditingController currentStaminaController = TextEditingController();
+  TextEditingController currentMovementController = TextEditingController();
+  TextEditingController groupController = TextEditingController();
 	IconButton deleteButton;
 	IconButton copyButton;
 	IconButton editButton;
@@ -38,6 +41,9 @@ class InitTrackerItemCard extends StatefulWidget{
 		aggravatedHpDmgController.text = initTrackerItem.vtmSpecific.healthAggravated.toString();
 		superficialWillDmgController.text = initTrackerItem.vtmSpecific.willSuperficial.toString();
 		aggravatedWillDmgController.text = initTrackerItem.vtmSpecific.willAggravated.toString();
+    groupController.text = initTrackerItem.group.toString();
+    currentStaminaController.text = initTrackerItem.hocSpecific.currentStamina.toString();
+    currentMovementController.text = initTrackerItem.hocSpecific.currentMovement.toString();
 	}
   
   @override
@@ -50,64 +56,78 @@ class InitTrackerItemCardState extends State<InitTrackerItemCard> {
   @override
 	Widget build(BuildContext context){
 		return Card(
-			color: widget.isSelected ? Theme.of(context).colorScheme.surfaceVariant : Theme.of(context).colorScheme.surface,
+			color: widget.isSelected ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surface,
 			child: Padding(
 				padding: const EdgeInsets.all(8.0),
-				child: Row(
-					children: [
-						Expanded(
-							flex: 0,
-							child: Text(widget.initTrackerItem.name, style: UIStyles.getRegularText(context)),
-						),
-						SizedBox(
-							width: MediaQuery.sizeOf(context).width > 500 ? 20 : 10,
-						),
-						Expanded(
-							//The notes field should take up as much space as it has available. 
-							flex: 1,
-							child: TextField(
-								controller: widget.notesController,
-								decoration: standardDecoration(),
-								style: TextStyle(fontSize: MediaQuery.sizeOf(context).width > 500 ? 12 : 10,),
-								onChanged: (value){
-									widget.initTrackerItem.notes = value;
-								}
-							),
-						),
-            rogueTraderSpecific(context),
-						runequestSpecific(context),
-						health(context),
-						SizedBox(
-							width: MediaQuery.sizeOf(context).width > 500 ? 20 : 10,
-						),
-						Container(
-							padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0),
-							decoration: BoxDecoration(
-								borderRadius: const BorderRadius.all(Radius.circular(10)),
-								border: Border.all(
-									color: Theme.of(context).colorScheme.outlineVariant,
-									width: 1.5,
-								),
-								color: Theme.of(context).colorScheme.outlineVariant
-								
-							),
-							child: Text(
-							  //Pad left "4" because of the decimal point and the trailing digit
-								widget.initTrackerItem.initiative.toString().padLeft(4, "0"),
-								style: UIStyles.getRegularText(context).copyWith(
-									fontWeight: FontWeight.bold, 
-									fontSize: MediaQuery.sizeOf(context).width > 500 ? 22 : 18,
-								)
-							),
-						),
-						SizedBox(
-							width: MediaQuery.sizeOf(context).width > 500 ? 5 : 2,
-						),
-						widget.editButton,
-						widget.copyButton,
-						widget.deleteButton,
-					]
-				),
+				child: Column(
+          children: [
+            ExpansionTile(
+              showTrailingIcon: hasExpansion(),
+              title: Row(
+                children: [
+                  Expanded(
+                    flex: 0,
+                    child: Text(widget.initTrackerItem.name, style: UIStyles.getRegularText(context)),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.sizeOf(context).width > 500 ? 20 : 10,
+                  ),
+                  Expanded(
+                    //The notes field should take up as much space as it has available. 
+                    flex: 1,
+                    child: TextField(
+                      controller: widget.notesController,
+                      decoration: standardDecoration(),
+                      style: TextStyle(fontSize: MediaQuery.sizeOf(context).width > 500 ? 12 : 10,),
+                      onChanged: (value){
+                        widget.initTrackerItem.notes = value;
+                      }
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.sizeOf(context).width > 500 ? 20 : 10,
+                  ),
+                  rogueTraderSpecific(context),
+                  runequestSpecific(context),
+                  hocSpecific(),
+                  health(context),
+                  SizedBox(
+                    width: MediaQuery.sizeOf(context).width > 500 ? 20 : 10,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0),
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                        width: 1.5,
+                      ),
+                      color: Theme.of(context).colorScheme.outlineVariant
+                      
+                    ),
+                    child: Text(
+                      //Pad left "4" because of the decimal point and the trailing digit
+                      widget.initTrackerItem.initiative.toString().padLeft(4, "0"),
+                      style: UIStyles.getRegularText(context).copyWith(
+                        fontWeight: FontWeight.bold, 
+                        fontSize: MediaQuery.sizeOf(context).width > 500 ? 22 : 18,
+                      )
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.sizeOf(context).width > 500 ? 5 : 2,
+                  ),
+                  widget.editButton,
+                  widget.copyButton,
+                  widget.deleteButton,
+                ]
+              ),
+              children: [
+                expandedInitiativeOptions(),
+              ]
+            ),
+          ],
+        ),
 			)
 		);
 	}
@@ -168,7 +188,6 @@ class InitTrackerItemCardState extends State<InitTrackerItemCard> {
 					onChanged:(value) {
 						widget.initTrackerItem.combatActionsTotal += value.toInt() - widget.initTrackerItem.combatActions;
 						widget.initTrackerItem.combatActions = value.toInt();
-						
 					},
 				),
 			);
@@ -191,10 +210,7 @@ class InitTrackerItemCardState extends State<InitTrackerItemCard> {
 							child: TextField(
 								controller: widget.superficialHpDmgController,
 								style: UIStyles.getRegularText(context),
-								decoration: standardDecoration().copyWith(
-									labelText: "S. HP",
-									floatingLabelAlignment: FloatingLabelAlignment.center
-								),
+								decoration: standardDecoration(label: "S. HP"),
 								onChanged:(value) {
 									widget.initTrackerItem.vtmSpecific.healthSuperficial = int.tryParse(value) ?? 0;
 								},
@@ -207,10 +223,7 @@ class InitTrackerItemCardState extends State<InitTrackerItemCard> {
 							child: TextField(
 								controller: widget.aggravatedHpDmgController,
 								style: UIStyles.getRegularText(context),
-								decoration: standardDecoration().copyWith(
-									labelText: "A. HP",
-									floatingLabelAlignment: FloatingLabelAlignment.center
-								),
+								decoration: standardDecoration(label: "A. HP"),
 								onChanged:(value) {
 									widget.initTrackerItem.vtmSpecific.healthAggravated = int.tryParse(value) ?? 0;
 								},
@@ -223,13 +236,11 @@ class InitTrackerItemCardState extends State<InitTrackerItemCard> {
 							child: TextField(
 								controller: TextEditingController(text: widget.initTrackerItem.totalHp.toString()), 
 								style: UIStyles.getRegularText(context),
-								decoration: standardDecoration().copyWith(
-									labelText: "T. HP",
-									floatingLabelAlignment: FloatingLabelAlignment.center,
+								decoration: standardDecoration(label: "T. HP").copyWith(
 									labelStyle: TextStyle(
-										color: Theme.of(context).colorScheme.onBackground,
+										color: Theme.of(context).colorScheme.onSurface,
 									),
-									fillColor: Theme.of(context).colorScheme.background
+									fillColor: Theme.of(context).colorScheme.surface
 								),
 								textAlign: TextAlign.center,
 								readOnly: true,
@@ -241,10 +252,7 @@ class InitTrackerItemCardState extends State<InitTrackerItemCard> {
 							child: TextField(
 								controller: widget.superficialWillDmgController,
 								style: UIStyles.getRegularText(context),
-								decoration: standardDecoration().copyWith(
-									labelText: "S. WP",
-									floatingLabelAlignment: FloatingLabelAlignment.center
-								),
+								decoration: standardDecoration(label: "S. WP"),
 								onChanged:(value) {
 									widget.initTrackerItem.vtmSpecific.willSuperficial = int.tryParse(value) ?? 0;
 								},
@@ -257,10 +265,7 @@ class InitTrackerItemCardState extends State<InitTrackerItemCard> {
 							child: TextField(
 								controller: widget.aggravatedWillDmgController,
 								style: UIStyles.getRegularText(context),
-								decoration: standardDecoration().copyWith(
-									labelText: "A. WP",
-									floatingLabelAlignment: FloatingLabelAlignment.center
-								),
+								decoration: standardDecoration(label: "A. WP"),
 								onChanged:(value) {
 									widget.initTrackerItem.vtmSpecific.willAggravated = int.tryParse(value) ?? 0;
 								},
@@ -273,13 +278,11 @@ class InitTrackerItemCardState extends State<InitTrackerItemCard> {
 							child: TextField(
 								controller: TextEditingController(text: widget.initTrackerItem.vtmSpecific.willTotal.toString()), 
 								style: UIStyles.getRegularText(context),
-								decoration: standardDecoration().copyWith(
-									labelText: "T. WP",
-									floatingLabelAlignment: FloatingLabelAlignment.center,
+								decoration: standardDecoration(label: "T. WP").copyWith(
 									labelStyle: TextStyle(
-										color: Theme.of(context).colorScheme.onBackground,
+										color: Theme.of(context).colorScheme.onSurface,
 									),
-									fillColor: Theme.of(context).colorScheme.background
+									fillColor: Theme.of(context).colorScheme.surface
 								),
 								textAlign: TextAlign.center,
 								readOnly: true,
@@ -300,17 +303,17 @@ class InitTrackerItemCardState extends State<InitTrackerItemCard> {
 							borderRadius: const BorderRadius.all(Radius.circular(10)),
 							border: Border.all(
 								color: Theme.of(context).colorScheme.outlineVariant,
-								width: 1.5,
+								width: 1,
 							),
 							color: Theme.of(context).colorScheme.outlineVariant,
 						),
 						child: Row( 
 							children: [
 								SizedBox(
-									width: 50,
+									width: 60,
 									child: TextField(
 										controller: widget.currentHpController,
-										decoration: standardDecoration(),
+										decoration: standardDecoration(label: "H."),
 										keyboardType: TextInputType.number,
 										inputFormatters: <TextInputFormatter>[
 											FilteringTextInputFormatter.allow(RegExp(r'^-?\d*')),
@@ -319,7 +322,6 @@ class InitTrackerItemCardState extends State<InitTrackerItemCard> {
 											widget.initTrackerItem.currentHp = int.tryParse(value) ?? 0;
 										},
 										style: UIStyles.getRegularText(context),
-										textAlign: TextAlign.right,
 									),
 								),
 								const Text("/ "),
@@ -332,8 +334,150 @@ class InitTrackerItemCardState extends State<InitTrackerItemCard> {
 		}
 	}
 
-	InputDecoration standardDecoration(){
+  Widget expandedInitiativeOptions(){
+    if (SystemChoices.vtm.computerReadableName == context.watch<SettingsBloc>().state.selectedSystem.computerReadableName)
+    {
+      return Row(
+        children: [
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsetsGeometry.all(8.0), 
+              child: DropdownMenu<CombatCategory>(
+                label: const Text("Phase"),
+                initialSelection: widget.initTrackerItem.category,
+                onSelected: (CombatCategory? value) {
+                  setState(() {
+                    widget.initTrackerItem.category = value ?? CombatCategory.other;
+                  });
+                },
+                dropdownMenuEntries: CombatCategory.values.map((CombatCategory value) {
+                  return DropdownMenuEntry<CombatCategory>(
+                    value: value,
+                    label: value.humanReadableName,
+                  );
+                }).toList(),
+              ),
+            )
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: 75,
+              child: TextField(
+                controller: widget.groupController,
+                style: UIStyles.getRegularText(context),
+                decoration: standardDecoration(label: "Group"),
+                onChanged:(value) {
+                  widget.initTrackerItem.group = int.tryParse(value) ?? 0;
+                },
+                textAlign: TextAlign.center,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.allow(RegExp(r'\d*')),
+                ],
+              ),
+            ),
+          )
+        ],
+      );
+    }
+    else {
+      return const SizedBox(height: 0, width: 0);
+    }
+  }
+
+  Widget hocSpecific(){
+    if (SystemChoices.hoc.computerReadableName == context.watch<SettingsBloc>().state.selectedSystem.computerReadableName) 
+		{
+			return Flexible(
+        flex: 0,
+				child: Row(
+					children: [
+						SizedBox(width: MediaQuery.sizeOf(context).width > 500 ? 20 : 10,),
+						Container(
+              padding: const EdgeInsets.fromLTRB(6.0, 1.0, 6.0, 2.0),
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  width: 1,
+                ),
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+              child: Row( 
+                children: [
+                  SizedBox(
+                    width: 50,
+                    child: TextField(
+                      controller: widget.currentStaminaController,
+                      decoration: standardDecoration(label: "SP."),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.allow(RegExp(r'^-?\d*')),
+                      ], 
+                      onChanged: (value){
+                        widget.initTrackerItem.hocSpecific.currentStamina = int.tryParse(value) ?? 0;
+                      },
+                      style: UIStyles.getRegularText(context),
+                    ),
+                  ),
+                  const Text("/ "),
+                  Text(widget.initTrackerItem.hocSpecific.totalStamina.toString(), style: UIStyles.getRegularText(context)),
+                ]
+              ),
+            ),
+            SizedBox(width: MediaQuery.sizeOf(context).width > 500 ? 20 : 10,),
+						Container(
+              padding: const EdgeInsets.fromLTRB(6.0, 1.0, 6.0, 2.0),
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  width: 1,
+                ),
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+              child: Row( 
+                children: [
+                  SizedBox(
+                    width: 50,
+                    child: TextField(
+                      controller: widget.currentMovementController,
+                      decoration: standardDecoration(label: "S."),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.allow(RegExp(r'^-?\d*')),
+                      ], 
+                      onChanged: (value){
+                        widget.initTrackerItem.hocSpecific.currentMovement = int.tryParse(value) ?? 0;
+                      },
+                      style: UIStyles.getRegularText(context),
+                    ),
+                  ),
+                  const Text("/ "),
+                  Text(widget.initTrackerItem.hocSpecific.totalMovement.toString(), style: UIStyles.getRegularText(context)),
+                ]
+              ),
+            ),
+					]
+				),
+			);
+		}
+		else {
+			return const SizedBox(height: 0, width: 0);
+		}
+  }
+
+  bool hasExpansion(){
+    if (SystemChoices.vtm.computerReadableName == context.watch<SettingsBloc>().state.selectedSystem.computerReadableName){
+      return true;
+    }
+    return false;
+  }
+
+	InputDecoration standardDecoration({String label = ""}){
 		return InputDecoration(
+      labelText: label,
+      floatingLabelAlignment: FloatingLabelAlignment.center,
 			border: OutlineInputBorder(
 				borderSide: BorderSide(color: Theme.of(context).colorScheme.outline)
 			),

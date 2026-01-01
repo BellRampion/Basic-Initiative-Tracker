@@ -76,26 +76,45 @@ class HomePage extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) {
 		return BlocConsumer<InitTrackerBloc, InitTrackerBlocState>(
-				listener: (context, state) async {
-			if (state.isNewRound) {
-				await showDialog(
-					context: context,
-					builder: (context) {
-						return AlertDialog(
-							content: Text("New Round Starting",
-									style: UIStyles.getRegularText(context)),
-							contentPadding: EdgeInsets.all(16.0),
-							actions: [
-								TextButton(
-									child: Text("Ok",
-											style: UIStyles.getTextButtonText(context)),
-									onPressed: () {
-										Navigator.pop(context);
-									})
-							]);
-					}
-				);
-			}
+			listener: (context, state) async {
+				if (state.isNewRound) {
+					await showDialog(
+						context: context,
+						builder: (context) {
+							return AlertDialog(
+								content: Text("New Round Starting",
+										style: UIStyles.getRegularText(context)),
+								contentPadding: EdgeInsets.all(16.0),
+								actions: [
+									TextButton(
+										child: Text("Ok",
+												style: UIStyles.getTextButtonText(context)),
+										onPressed: () {
+											Navigator.pop(context);
+										})
+								]);
+						}
+					);
+				}
+				if (state.hasError) {
+					await showDialog(
+						context: context,
+						builder: (context) {
+							return AlertDialog(
+								content: Text(state.displayString ?? "Error: please restart application",
+										style: UIStyles.getRegularText(context)),
+								contentPadding: EdgeInsets.all(16.0),
+								actions: [
+									TextButton(
+										child: Text("Ok",
+												style: UIStyles.getTextButtonText(context)),
+										onPressed: () {
+											Navigator.pop(context);
+										})
+								]);
+						}
+					);
+				}
 		}, builder: (context, state) {
 			return Scaffold(
 				appBar: AppBar(
@@ -143,13 +162,7 @@ class HomePage extends StatelessWidget {
 																return addEditItemDialog(
 																	title: "Edit Item",
 																	context: context,
-																	name: initialItem.name,
-																	notes: initialItem.notes,
-																	initiative: initialItem.initiative,
-																	currentHp: initialItem.currentHp,
-																	totalHp: initialItem.totalHp,
-																	combatActions: initialItem.combatActions,
-																	vtmValues: initialItem.vtmSpecific,
+																	item: initialItem,
 																);
 															},
 														);
@@ -168,13 +181,7 @@ class HomePage extends StatelessWidget {
 															builder: (context) {
 																return addEditItemDialog(
 																	context: context,
-																	name: initialItem.name,
-																	notes: initialItem.notes,
-																	initiative: initialItem.initiative,
-																	currentHp: initialItem.currentHp,
-																	totalHp: initialItem.totalHp,
-																	combatActions: initialItem.combatActions,
-																	vtmValues: initialItem.vtmSpecific,
+																	item: initialItem,
 																);
 															},
 														);
@@ -300,13 +307,7 @@ class HomePage extends StatelessWidget {
 									builder: (context) {
 										return addEditItemDialog(
 											context: context,
-											name: "",
-											notes: "",
-											initiative: 0,
-											currentHp: 0,
-											totalHp: 0,
-											combatActions: 0,
-											vtmValues: VtmSpecificValues()
+											item: InitTrackerItem(name: "", notes: "", initiative: 0, vtmSpecific: VtmSpecificValues(), hocSpecific: HocSpecificValues()),
 										);
 									},
 								);
@@ -338,36 +339,37 @@ class HomePage extends StatelessWidget {
 			);
 		});
 	}
-
 	Widget addEditItemDialog({
 		required BuildContext context,
-		required String name,
-		required String notes,
-		required int currentHp,
-		required int totalHp,
-		required double initiative,
-		required int combatActions,
-		required VtmSpecificValues vtmValues,
+		required InitTrackerItem item,
 		String? title,
 	}) {
-		TextEditingController nameController = TextEditingController(text: name);
-		TextEditingController notesController = TextEditingController(text: notes);
+		TextEditingController nameController = TextEditingController(text: item.name);
+		TextEditingController notesController = TextEditingController(text: item.notes);
 		TextEditingController currentHpController =
-				TextEditingController(text: currentHp.toString());
+				TextEditingController(text: item.currentHp.toString());
 		TextEditingController totalHpController =
-				TextEditingController(text: totalHp.toString());
+				TextEditingController(text: item.totalHp.toString());
 		TextEditingController initiativeController =
-				TextEditingController(text: initiative.toString());
-		TextEditingController combatActionsController = TextEditingController(text: combatActions.toString());
+				TextEditingController(text: item.initiative.toString());
+		TextEditingController combatActionsController = TextEditingController(text: item.combatActions.toString());
 		TextEditingController superficialHpDmgController =
-				TextEditingController(text: vtmValues.healthSuperficial.toString());
+				TextEditingController(text: item.vtmSpecific.healthSuperficial.toString());
 		TextEditingController aggravatedHpDmgController =
-				TextEditingController(text: vtmValues.healthAggravated.toString());
+				TextEditingController(text: item.vtmSpecific.healthAggravated.toString());
 		TextEditingController superficialWillDmgController =
-				TextEditingController(text: vtmValues.willSuperficial.toString());
-		TextEditingController aggravatedWillDmgController = TextEditingController(text: vtmValues.willAggravated.toString());
+				TextEditingController(text: item.vtmSpecific.willSuperficial.toString());
+		TextEditingController aggravatedWillDmgController = TextEditingController(text: item.vtmSpecific.willAggravated.toString());
 		TextEditingController totalWillController =
-				TextEditingController(text: vtmValues.willTotal.toString());
+				TextEditingController(text: item.vtmSpecific.willTotal.toString());
+		//Hearts of Coal
+		TextEditingController totalStaminaController =
+				TextEditingController(text: item.hocSpecific.totalStamina.toString());
+		TextEditingController currentStaminaController =
+				TextEditingController(text: item.hocSpecific.currentStamina.toString());
+		TextEditingController totalMovementController =
+				TextEditingController(text: item.hocSpecific.totalMovement.toString());
+		TextEditingController currentMovementController = TextEditingController(text: item.hocSpecific.currentMovement.toString());
 
 		return AlertDialog(
 				title: Text(title ?? "Add New Initiative Step",
@@ -411,16 +413,16 @@ class HomePage extends StatelessWidget {
 									],
 								)
 							],
-								//Conditionally returns either an empty SizedBox or the item fields depending on selected system
-								vtmItemFields(
-									vtmValues: vtmValues,
-									context: context,
-									superficialHpDmgController: superficialHpDmgController,
-									aggravatedHpDmgController: aggravatedHpDmgController,
-									superficialWillDmgController: superficialWillDmgController,
-									aggravatedWillDmgController: aggravatedWillDmgController,
-									totalWillController: totalWillController
-								),
+              //Conditionally returns either an empty SizedBox or the item fields depending on selected system
+              vtmItemFields(
+                vtmValues: item.vtmSpecific,
+                context: context,
+                superficialHpDmgController: superficialHpDmgController,
+                aggravatedHpDmgController: aggravatedHpDmgController,
+                superficialWillDmgController: superficialWillDmgController,
+                aggravatedWillDmgController: aggravatedWillDmgController,
+                totalWillController: totalWillController
+              ),
 							SizedBox(height: boxHeight),
 							TextField(
 								decoration: InputDecoration(
@@ -446,6 +448,14 @@ class HomePage extends StatelessWidget {
 								],
 							),
 							SizedBox(height: boxHeight),
+							hocSpecificFields(
+								context: context,
+								hocValues: item.hocSpecific,
+								totalStaminaController: totalStaminaController,
+								totalMovementController: totalMovementController,
+								currentStaminaController: currentStaminaController,
+								currentMovementController: currentMovementController,
+							),
 						]),
 					),
 				),
@@ -458,7 +468,7 @@ class HomePage extends StatelessWidget {
 						onPressed: () {
 							return Navigator.pop(
 									context,
-									InitTrackerItem(
+									item.copyWith(
 										name: nameController.text,
 										notes: notesController.text,
 										initiative: double.tryParse(initiativeController.text) ?? 0,
@@ -472,6 +482,13 @@ class HomePage extends StatelessWidget {
 											willSuperficial: int.tryParse( superficialWillDmgController.text) ?? 0, 
 											willAggravated: int.tryParse( aggravatedWillDmgController.text) ?? 0,
 											willTotal: int.tryParse( totalWillController.text) ?? 0,
+										), 
+										hocSpecific: HocSpecificValues(
+											//Default movement and stamina to max
+											totalMovement: int.tryParse( totalMovementController.text ) ?? 0,
+											totalStamina: int.tryParse(totalStaminaController.text) ?? 0,
+											currentMovement: int.tryParse(currentMovementController.text) ?? int.tryParse( totalMovementController.text ) ?? 0,
+											currentStamina: int.tryParse( currentStaminaController.text) ?? int.tryParse(totalStaminaController.text) ?? 0,
 										)
 									));
 						},
@@ -576,6 +593,49 @@ class HomePage extends StatelessWidget {
 							border: OutlineInputBorder()),
 						style: UIStyles.getRegularText(context),
 						controller: combatActionsController,
+						keyboardType: TextInputType.number,
+						inputFormatters: <TextInputFormatter>[
+							FilteringTextInputFormatter.allow(RegExp(r'\d+')),
+						],
+					),
+				]
+			);
+		}
+		else {
+			return SizedBox(height: 0, width: 0,);
+		}
+	}
+
+	Widget hocSpecificFields({
+		required BuildContext context,
+		required HocSpecificValues hocValues,
+		required TextEditingController totalStaminaController,
+		required TextEditingController totalMovementController,
+		required TextEditingController currentStaminaController,
+		required TextEditingController currentMovementController
+	}){
+		if (SystemChoices.hoc.computerReadableName == context.watch<SettingsBloc>().state.selectedSystem.computerReadableName) {
+			return Column(
+				children: [
+					SizedBox(height: boxHeight),
+					TextField(
+						decoration: InputDecoration(
+							labelText: "Total Stamina", 
+							border: OutlineInputBorder()),
+						style: UIStyles.getRegularText(context),
+						controller: totalStaminaController,
+						keyboardType: TextInputType.number,
+						inputFormatters: <TextInputFormatter>[
+							FilteringTextInputFormatter.allow(RegExp(r'\d+')),
+						],
+					),
+					SizedBox(height: boxHeight),
+					TextField(
+						decoration: InputDecoration(
+							labelText: "Total Movement", 
+							border: OutlineInputBorder()),
+						style: UIStyles.getRegularText(context),
+						controller: totalMovementController,
 						keyboardType: TextInputType.number,
 						inputFormatters: <TextInputFormatter>[
 							FilteringTextInputFormatter.allow(RegExp(r'\d+')),

@@ -35,10 +35,15 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 						break;
 					}
 				}
+
 			}
 			else {
 				state.initList.add(event.item);
 			}
+
+      //Set current stamina and movement to equal total stamina and movement
+      state.initList[state.listPlace].hocSpecific.currentMovement = state.initList[state.listPlace].hocSpecific.totalMovement;
+      state.initList[state.listPlace].hocSpecific.currentStamina = state.initList[state.listPlace].hocSpecific.totalStamina;
 
 			emit(InitTrackerBlocState(
 				initList: state.initList,
@@ -62,13 +67,12 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 				newStep = 0;
 				//Every round, combat action count should decrement down to 0
 				for (InitTrackerItem item in state.initList){
-					if (item.combatActions > 0){
+					if ( item.combatActions > 0){
 						--item.combatActions;
-						combatActionsFinished = false;
-						//If it's 0 after decrementing, then don't rule out a new round starting
-						if (item.combatActions == 0)
+            //If we haven't hit 0 on these combat actions, can't start a new round yet
+						if (item.combatActions != 0)
 						{
-							combatActionsFinished = true;
+							combatActionsFinished = false;
 						}
 					}
 				}
@@ -79,7 +83,11 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
           item.reaction1Used = false;
           item.reaction2Used = false;
 					item.combatActions = item.combatActionsTotal;
+          item.hocSpecific.currentMovement = item.hocSpecific.totalMovement;
         }
+        //Sort in case groups or combat category have changed
+        sortInitList(state.initList);
+
 				emit(InitTrackerBlocState(
 					initList: state.initList,
 					listPlace: newStep,
@@ -170,6 +178,8 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 		});
 
 		on<RestartTracker>((event, emit){
+      //Sort in case category or group values have changed
+      sortInitList(state.initList);
 			emit(InitTrackerBlocState(
 				initList: state.initList,
 				listPlace: 0,
@@ -224,7 +234,7 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 					isNewRound: false,
 					displayString: "${event.filename} loaded successfully.",
 					hasError: false,
-          roundCounter: 0
+          roundCounter: 1
 				));
 			}
 			catch (ex){
@@ -235,7 +245,7 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 					isNewRound: false,
 					displayString: "Error loading ${event.filename}. File not loaded.",
 					hasError: true,
-          roundCounter: 0,
+          roundCounter: 1,
 				));
 			}
 
@@ -243,24 +253,31 @@ class InitTrackerBloc extends Bloc<InitTrackerBlocEvent, InitTrackerBlocState> {
 
 		on<SwitchSystem>((event, emit){
 			selectedSystem = event.system;
+      if (state.initList.isNotEmpty){
+        emit(
+          InitTrackerBlocState(
+            initList: state.initList,
+            listPlace: 0,
+            isNewRound: false,
+            roundCounter: 1,
+            hasError: true,
+            displayString: "Warning: Switching systems after creating initiative items can cause strange behavior if any system-specific fields are filled out! E.g. if you gave a character combat actions, the round counter will not behave correctly.",
+          )
+        );
+      }
 		});
 
 	}
 	
 	void sortInitList(List<InitTrackerItem> initList){
 
-		//Sort high to low initative for most systems; otherwise, use custom sorting
-		if (selectedSystem.computerReadableName == SystemChoices.vtm.computerReadableName){
-			int categorySort(InitTrackerItem item1, InitTrackerItem item2) => item1.category.priority.compareTo(item2.category.priority);	
-			int groupSort(InitTrackerItem item1, InitTrackerItem item2) => item1.group.compareTo(item2.group);	
-			int initSort(InitTrackerItem item1, InitTrackerItem item2) => item1.initiative.compareTo(item2.initiative) * -1;	
+		//Sort first by category, then by group within category, then by initiative within group
+    int categorySort(InitTrackerItem item1, InitTrackerItem item2) => item1.category.priority.compareTo(item2.category.priority);	
+    int groupSort(InitTrackerItem item1, InitTrackerItem item2) => item1.group.compareTo(item2.group);	
+    int initSort(InitTrackerItem item1, InitTrackerItem item2) => item1.initiative.compareTo(item2.initiative) * -1;	
 
-			final compareItems = categorySort.then(groupSort).then(initSort);
+    final compareItems = categorySort.then(groupSort).then(initSort);
 
-			initList.sort(compareItems);
-		}
-		else {
-			initList.sort((a, b) => a.initiative.compareTo(b.initiative) * -1);
-		}
+    initList.sort(compareItems);
 	}
 }

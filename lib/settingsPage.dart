@@ -84,8 +84,8 @@ class SettingsPageState extends State<SettingsPage> {
                             newSelectedSystem: value ?? SystemChoices.pathfinder
                           )
                         );
-												//InitTrackerBloc also needs to store the selected system 
-												BlocProvider.of<InitTrackerBloc>(context).add(
+                        //InitTrackerBloc also needs to store the selected system 
+                        BlocProvider.of<InitTrackerBloc>(context).add(
                           SwitchSystem(
                             system: value ?? SystemChoices.pathfinder
                           )

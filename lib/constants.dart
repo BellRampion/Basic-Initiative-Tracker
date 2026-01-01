@@ -8,7 +8,8 @@ enum SystemChoices {
 	pathfinder(humanReadableName: "Pathfinder", computerReadableName: "pf"), 
 	rogueTrader(humanReadableName: "Rogue Trader", computerReadableName: "rt"),
 	runequest(humanReadableName: "Runequest II/Legend", computerReadableName: "rq"),
-	vtm(humanReadableName: "Vampire The Masquerade", computerReadableName: "vtm");
+	vtm(humanReadableName: "Vampire The Masquerade", computerReadableName: "vtm"),
+  hoc(humanReadableName: "Hearts of Coal", computerReadableName: "hoc");
 
   const SystemChoices({
     required this.computerReadableName, required this.humanReadableName
@@ -23,8 +24,8 @@ enum CombatCategory {
 	estabMelee(humanReadableName: "Estab. Melee", computerReadableName: "estabmelee", priority: 0),
 	ranged(humanReadableName: "Ranged", computerReadableName: "ranged", priority: 1),
 	newMelee(humanReadableName: "New Melee", computerReadableName: "newmelee", priority: 2),
-	///Other is the catch-all and thus needs no name
-	other(humanReadableName: "", computerReadableName: "other", priority: 3);
+	///Other is the catch-all
+	other(humanReadableName: "Other", computerReadableName: "other", priority: 3);
 
 	final String humanReadableName;
 	final String computerReadableName;
